@@ -1,0 +1,6 @@
+@ArabDevCommunity.PL_HostAddress = http://localhost:5027
+
+GET {{ArabDevCommunity.PL_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
