@@ -1,4 +1,8 @@
 
+using ArabDev.Data.Contexts;
+using ArabDevCommunity.PL.Extention;
+using Microsoft.EntityFrameworkCore;
+
 namespace ArabDevCommunity.PL
 {
     public class Program
@@ -10,7 +14,12 @@ namespace ArabDevCommunity.PL
             // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddDbContext<ArabDevDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+            });
+            builder.Services.AddIdentityServices();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -24,6 +33,7 @@ namespace ArabDevCommunity.PL
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
