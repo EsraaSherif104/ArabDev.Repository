@@ -20,7 +20,7 @@ namespace ArabDevCommunity.PL
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 
             });
-            builder.Services.AddIdentityServices();
+            builder.Services.AddIdentityServices(builder.Configuration);
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -34,7 +34,7 @@ namespace ArabDevCommunity.PL
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseStatusCodePagesWithReExecute("/errors/{0}");
             app.UseHttpsRedirection();
             app.UseAuthentication();
 

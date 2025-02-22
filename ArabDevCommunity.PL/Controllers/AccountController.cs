@@ -2,9 +2,11 @@
 using ArabDev.Data.Services;
 using ArabDevCommunity.PL.Dto;
 using ArabDevCommunity.PL.Error;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ArabDevCommunity.PL.Controllers
 {
@@ -28,6 +30,12 @@ namespace ArabDevCommunity.PL.Controllers
         //انا هرجع حاجه من نوع dto
         public async Task<ActionResult<UserDto>> SignUp(SignUpDto model)
         {
+
+            if (CheckedEmailExists(model.Email).Result.Value)
+            {
+                return BadRequest(new ApiResponse(400, "email is already in use"));
+            }
+
             var User = new User()
             {
                 DisplayName = model.DisplayName,
@@ -67,6 +75,32 @@ namespace ArabDevCommunity.PL.Controllers
                 Token = await _tokenServices.CreateTokenAsync(User, _userManager)
 
             });
+        }
+
+        [Authorize]
+
+        [HttpGet("GetCurrentUser")]
+        public async Task<ActionResult<UserDto>> GetCurrentUser()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            var returnedobject = new UserDto()
+            {
+                DisplayName = user.DisplayName,
+                Email = user.Email,
+                Token = await _tokenServices.CreateTokenAsync(user, _userManager)
+            };
+            return Ok(returnedobject);
+        }
+
+        [HttpGet("emailExists")]
+        //baseurl/api/account//emailexisys
+        public async Task<ActionResult<bool>> CheckedEmailExists(string Email)
+        {
+            //  var user = await _userManager.FindByEmailAsync(Email);
+            //  if (user is null) return false;
+            // else return true;
+            return await _userManager.FindByEmailAsync(Email) is not null;
         }
 
 
