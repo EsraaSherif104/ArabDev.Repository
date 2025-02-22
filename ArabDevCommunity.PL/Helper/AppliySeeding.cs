@@ -20,11 +20,13 @@ namespace ArabDevCommunity.PL.Helper
                     await context.Database.MigrateAsync();
                     var userManager=services.GetRequiredService<UserManager<User>>();
                     await ApplySeedingDbcontext.SeedUserAsync(userManager);
+
+                    await ApplySeedingDbcontext.SeedAsync(context, loggerFactory);
                   //  await DevContextSeeding.SeedAsync(context, loggerFactory);
                 }
                 catch (Exception ex)
                 {
-                    var logger = loggerFactory.CreateLogger<Program>();
+                    var logger = loggerFactory.CreateLogger<AppliySeeding>();
                     logger.LogError(ex.Message);
                     if (ex.InnerException != null)
                     {
