@@ -14,7 +14,7 @@ namespace ArabDev.Data.Entities
 
 
         public User User { get; set; }
-        public int? UserId { get; set; }
+        public string? UserId { get; set; }
 
 
         public ICollection<Likes> Likes { get; set; } = new List<Likes>();

@@ -13,7 +13,7 @@ namespace ArabDev.Data.Entities
         public int? PostId { get; set; }
         //---------------------------------
         public User Users { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
 
         public PodCast PodCast { get; set; }
         public int? PodCastId { get; set; }

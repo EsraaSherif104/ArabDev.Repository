@@ -11,6 +11,6 @@ namespace ArabDev.Data.Entities
         public List<string> SkillName { get; set; } = new List<string>();
 
         public User Users { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
     }
 }

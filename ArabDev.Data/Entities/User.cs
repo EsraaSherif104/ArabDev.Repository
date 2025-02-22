@@ -12,6 +12,8 @@ namespace ArabDev.Data.Entities
     public class User : IdentityUser
     {
         [Required]
+        public string DisplayName { get; set; }
+        [Required]
         [MaxLength(200)]
 
         public string Address { get; set; }

@@ -23,7 +23,7 @@ namespace ArabDev.Data.Entities
         public List<string>? Images { get; set; } = new List<string>();
         [ForeignKey("UserId")]
         public User User { get; set; }
-        public int? UserId { get; set; }
+        public string? UserId { get; set; }
 
         public ICollection<Likes> Likes { get; set; } = new List<Likes>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
