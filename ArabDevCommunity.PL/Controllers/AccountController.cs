@@ -103,6 +103,9 @@ namespace ArabDevCommunity.PL.Controllers
             return await _userManager.FindByEmailAsync(Email) is not null;
         }
 
+        //SignUpGoogle     [HttpGet("SignUpGoogle")]
+
+
 
     }
 }

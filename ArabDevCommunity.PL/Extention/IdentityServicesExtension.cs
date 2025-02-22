@@ -2,6 +2,8 @@
 using ArabDev.Data.Entities;
 using ArabDev.Data.Services;
 using ArabDev.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -24,6 +26,10 @@ namespace ArabDevCommunity.PL.Extention
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+             
+
+
             })
                            .AddJwtBearer(options =>
                            {
@@ -38,6 +44,12 @@ namespace ArabDevCommunity.PL.Extention
                                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]))
 
                                };
+                           }).AddCookie()
+                           .AddGoogle(options =>
+                           {
+                               options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                               options.ClientId = configuration["GoogleWeb:ClientID"];
+                               options.ClientSecret = configuration["GoogleWeb:Clientsecret"];
                            });
 
             return Services;
