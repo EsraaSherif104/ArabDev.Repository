@@ -20,6 +20,9 @@ namespace ArabDev.Services.Services.Users
 
         Task DeleteUserAsync(string userId);
 
+        Task<List<UserDetailsDto>> SearchUsersByNameAsync(string userName);
+
+
 
 
 

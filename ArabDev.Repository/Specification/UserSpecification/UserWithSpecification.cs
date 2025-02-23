@@ -15,12 +15,12 @@ namespace ArabDev.Repository.Specification.UserSpecification
  &&
                 (string.IsNullOrEmpty(spec.Job) || u.Job == spec.Job) &&
                 (string.IsNullOrEmpty(spec.Address) || u.Address.Contains(spec.Address)) &&
-                (string.IsNullOrEmpty(spec.Search) || u.UserName.Trim().ToLower().Contains(spec.Search.ToLower()))
+                (string.IsNullOrEmpty(spec.Search) || u.DisplayName.Trim().ToLower().Contains(spec.Search.ToLower()))
             )
         {
             AddInclude(u => u.Posts);
             AddInclude(u => u.Skills);
-            Addorderby(u => u.UserName);
+            Addorderby(u => u.DisplayName);
             ApplyPagination(spec.PageSize * (spec.PageIndex - 1), spec.PageSize);
 
             if (!string.IsNullOrEmpty(spec.Sort))
@@ -28,10 +28,10 @@ namespace ArabDev.Repository.Specification.UserSpecification
                 switch (spec.Sort)
                 {
                     case "NameDesc":
-                        AddorderbyAcend(u => u.UserName);
+                        AddorderbyAcend(u => u.DisplayName);
                         break;
                     default:
-                        Addorderby(u => u.UserName);
+                        Addorderby(u => u.DisplayName);
                         break;
                 }
             }
@@ -41,7 +41,7 @@ namespace ArabDev.Repository.Specification.UserSpecification
         {
             AddInclude(u => u.Posts);
             AddInclude(u => u.Skills);
-            Addorderby(u => u.UserName);
+            Addorderby(u => u.DisplayName);
         }
     }
 }

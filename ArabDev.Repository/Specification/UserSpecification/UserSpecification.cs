@@ -9,6 +9,8 @@ namespace ArabDev.Repository.Specification.UserSpecification
     public class UserSpecification
     {
         public string? Id { get; set; }
+        public string? DisplayName { get; set; }
+        
         public string? Job { get; set; }
 
         public string? Address { get; set; }

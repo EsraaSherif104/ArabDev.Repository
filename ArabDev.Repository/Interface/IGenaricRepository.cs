@@ -16,7 +16,7 @@ namespace ArabDev.Repository.Interface
 
         //  Task<TEntity> GetByIdAsNoTrackingAsync(TKey? id);
 
-        Task<TEntity> SearchByNameAsync(string username);
+         Task<List<TEntity>> SearchByNameAsync(string username);
         Task<IReadOnlyList<TEntity>> GetAllAsync();
         Task<IReadOnlyList<TEntity>> GetAllWithSpecificationAsync(ISpecification<TEntity> spac);
 

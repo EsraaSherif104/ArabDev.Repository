@@ -121,6 +121,12 @@ namespace ArabDev.Services.Services.Users
             await userRepository.DeleteAsync(user);
             await _unitOfWork.CompleteAync();
         }
+
+        public async Task<List<UserDetailsDto>> SearchUsersByNameAsync(string userName)
+        {
+            var users = await _unitOfWork.Repository<User, string>().SearchByNameAsync(userName);
+            return _mapper.Map<List<UserDetailsDto>>(users);
+        }
     }
 }
     

@@ -30,8 +30,12 @@ namespace ArabDev.Repository.Repositories
         public async Task<TEntity> GetByIdAsync(Tkey? id)
         => await _context.Set<TEntity>().FindAsync(id);
 
-        public async Task<TEntity> SearchByNameAsync(string username)
-       => await _context.Set<TEntity>().FindAsync(username);
+        public async Task<List<TEntity>> SearchByNameAsync(string username)
+        {
+            return await _context.Set<TEntity>()
+                .Where(u => EF.Functions.Like(EF.Property<string>(u, "UserName"), $"%{username}%"))
+                .ToListAsync();
+        }
 
 
         public async Task AddAsync(TEntity entity)

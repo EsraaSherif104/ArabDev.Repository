@@ -114,6 +114,12 @@ namespace ArabDevCommunity.PL.Controllers
                 return StatusCode(500, response);
             }
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchUsers(string name)
+        {
+            var users = await _userService.SearchUsersByNameAsync(name);
+            return Ok(users);
+        }
 
 
 
