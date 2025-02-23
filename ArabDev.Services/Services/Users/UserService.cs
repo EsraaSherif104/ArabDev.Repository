@@ -4,6 +4,7 @@ using ArabDev.Repository.Specification.UserSpecification;
 using ArabDev.Services.Services.DTOS;
 using ArabDev.Services.Services.Helper;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +17,16 @@ namespace ArabDev.Services.Services.Users
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ILogger<UserService> _logger;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<UserService> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            this._logger = logger;
         }
+
+
 
         public async Task<PaginateResultDto<UserDetailsDto>> GetAllUserAsync(UserSpecification input)
         {
@@ -46,6 +51,44 @@ namespace ArabDev.Services.Services.Users
             var mappedUser = _mapper.Map<UserDetailsDto>(user);
 
             return mappedUser;
+        }
+        public async Task<UserDetailsDto> AddOrUpdatePictureAsync(UserupdataPictureDTo pictureDto)
+        {
+            // التحقق من وجود الملف
+            if (pictureDto?.Picture == null || pictureDto.Picture.Length == 0)
+                throw new ArgumentException("No file was uploaded.");
+
+            // التحقق من نوع الملف
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            var fileExtension = Path.GetExtension(pictureDto.Picture.FileName).ToLower();
+            if (!allowedExtensions.Contains(fileExtension))
+                throw new ArgumentException("Invalid file type. Only JPG, JPEG, and PNG are allowed");
+
+            // التحقق من حجم الملف (5MB كحد أقصى)
+            if (pictureDto.Picture.Length > 5 * 1024 * 1024)
+                throw new ArgumentException("File size exceeds the allowed limit (5MB).");
+
+            // البحث عن المستخدم
+            var user = await _unitOfWork.Repository<User, string>().GetByIdAsync(pictureDto.UserId);
+            if (user == null)
+                throw new KeyNotFoundException($"User with ID {pictureDto.UserId} not found..");
+
+            // حذف الصورة القديمة إن وجدت
+            if (!string.IsNullOrEmpty(user.PictureUrl))
+            {
+                var oldFileName = Path.GetFileName(user.PictureUrl);
+                DocumentSetting.DeleteFile(oldFileName, "Images");
+            }
+
+            // رفع الصورة الجديدة
+            var savedFilePath = await DocumentSetting.UploadFileAsync(pictureDto.Picture, "Images");
+            user.PictureUrl = savedFilePath;
+
+            // تحديث البيانات وحفظها
+            _unitOfWork.Repository<User, string>().UpdateAsync(user);
+            await _unitOfWork.CompleteAync();
+
+            return _mapper.Map<UserDetailsDto>(user);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,8 @@ namespace ArabDev.Services.Services.DTOS
         public string Job { get; set; }
 
         public string PictureUrl { get; set; }
+
+
 
         public DateTime CreatAt { get; set; }
         public List<string> Interests { get; set; }
