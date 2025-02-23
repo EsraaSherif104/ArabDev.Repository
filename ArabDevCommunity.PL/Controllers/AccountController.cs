@@ -5,7 +5,9 @@ using ArabDevCommunity.PL.Error;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Claims;
 
 namespace ArabDevCommunity.PL.Controllers
@@ -16,6 +18,7 @@ namespace ArabDevCommunity.PL.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ITokenServices _tokenServices;
+
 
         public AccountController(UserManager<User> userManager,SignInManager<User> signInManager
                                  , ITokenServices tokenServices
@@ -45,8 +48,16 @@ namespace ArabDevCommunity.PL.Controllers
 
             };
             var result=  await  _userManager.CreateAsync(User,model.Password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return BadRequest(new ApiResponse(400, errors));
+            }
 
-            if (!result.Succeeded) return BadRequest(new ApiResponse(400));
+
+
+
+            // if (!result.Succeeded) return BadRequest(new ApiResponse(400));
             var ReturenedUser = new UserDto()
             {
                 DisplayName = User.DisplayName,
@@ -63,11 +74,14 @@ namespace ArabDevCommunity.PL.Controllers
         public async Task<ActionResult<UserDto>>Login(LoginDto model)
         {
             var User= await _userManager.FindByEmailAsync(model.Email);
-            if (User is null) return Unauthorized(new ApiResponse(401));
+            if (User is null) return Unauthorized(new ApiResponse(401, "password or email incorrect"));
+
 
             var result = await _signInManager.CheckPasswordSignInAsync(User, model.Password, false);
-            if (!result.Succeeded) return Unauthorized(new ApiResponse(401));
-
+            if (!result.Succeeded)
+            {
+                return Unauthorized(new ApiResponse(401, "password or email incorrect"));
+            }
             return Ok(new UserDto()
             {
                 DisplayName = User.DisplayName,
@@ -77,7 +91,7 @@ namespace ArabDevCommunity.PL.Controllers
             });
         }
 
-        [Authorize]
+       // [Authorize]
 
         [HttpGet("GetCurrentUser")]
         public async Task<ActionResult<UserDto>> GetCurrentUser()

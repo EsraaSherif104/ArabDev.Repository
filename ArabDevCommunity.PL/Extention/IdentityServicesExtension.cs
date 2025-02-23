@@ -18,10 +18,8 @@ namespace ArabDevCommunity.PL.Extention
             Services.AddScoped<ITokenServices, TokenServices>();
 
             Services.AddIdentity<User, IdentityRole>()
-                            .AddEntityFrameworkStores<ArabDevDbContext>();
-           
-            
-            
+                           .AddEntityFrameworkStores<ArabDevDbContext>();
+
             Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -51,6 +49,10 @@ namespace ArabDevCommunity.PL.Extention
                                options.ClientId = configuration["GoogleWeb:ClientID"];
                                options.ClientSecret = configuration["GoogleWeb:Clientsecret"];
                            });
+           // Services.AddAuthorization(options => {
+             //   options.AddPolicy("EmailConfirmed", policy =>
+               ////     policy.RequireClaim("EmailConfirmed", "True"));
+          //  });
 
             return Services;
         }

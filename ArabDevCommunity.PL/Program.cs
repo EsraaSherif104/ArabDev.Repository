@@ -20,6 +20,7 @@ namespace ArabDevCommunity.PL
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 
             });
+
             builder.Services.AddIdentityServices(builder.Configuration);
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

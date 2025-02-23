@@ -30,7 +30,8 @@ namespace ArabDev.Services
             var AuthClamis = new List<Claim>()
             {
                 new Claim(ClaimTypes.GivenName,user.DisplayName),
-                new Claim(ClaimTypes.Email,user.Email)
+                new Claim(ClaimTypes.Email,user.Email),
+
             };
 
             var UserRole = await userManager.GetRolesAsync(user);

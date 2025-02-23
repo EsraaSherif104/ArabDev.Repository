@@ -13,15 +13,14 @@ namespace ArabDev.Data.Entities
     {
         [Required]
         public string DisplayName { get; set; }
-        [Required]
         [MaxLength(200)]
 
-        public string Address { get; set; }
-        public string Job { get; set; }
+        public string? Address { get; set; }
+        public string? Job { get; set; }
 
         public string? PictureUrl { get; set; }
 
-        public List<string> Interests { get; set; } = new List<string>();
+        public List<string>? Interests { get; set; } = new List<string>();
 
 
         // Navigation Properties
