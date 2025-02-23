@@ -18,7 +18,7 @@ namespace ArabDevCommunity.PL.Controllers
         private readonly ITokenServices _tokenServices;
 
         public AccountController(UserManager<User> userManager,SignInManager<User> signInManager
-                                 , ITokenServices tokenServices
+                                 , ITokenServices tokenServices, IEmailSender emailSender
 )
         {
             this._userManager = userManager;
