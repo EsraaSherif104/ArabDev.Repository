@@ -1,5 +1,9 @@
 
 using ArabDev.Data.Contexts;
+using ArabDev.Repository.Interface;
+using ArabDev.Repository.Repositories;
+using ArabDev.Services.Services.Helper;
+using ArabDev.Services.Services.Users;
 using ArabDevCommunity.PL.Extention;
 using ArabDevCommunity.PL.Helper;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +24,9 @@ namespace ArabDevCommunity.PL
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 
             });
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             builder.Services.AddIdentityServices(builder.Configuration);
             builder.Services.AddEndpointsApiExplorer();
