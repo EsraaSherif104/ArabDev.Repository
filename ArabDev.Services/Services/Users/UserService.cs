@@ -90,5 +90,22 @@ namespace ArabDev.Services.Services.Users
 
             return _mapper.Map<UserDetailsDto>(user);
         }
+
+        public async Task<UserDetailsDto> UpdateUserDetailsAsync(UserDetailsDto dto)
+        {
+            if (string.IsNullOrEmpty(dto.Id))
+                throw new ArgumentException("User ID is required");
+
+            var user = await _unitOfWork.Repository<User, string>().GetByIdAsync(dto.Id);
+            if (user == null)
+                throw new KeyNotFoundException("User not found");
+
+            _mapper.Map(dto, user);
+
+            _unitOfWork.Repository<User, string>().UpdateAsync(user);
+            await _unitOfWork.CompleteAync();
+
+            return _mapper.Map<UserDetailsDto>(user);
+        }
     }
-}
+    }

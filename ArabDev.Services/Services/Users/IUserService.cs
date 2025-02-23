@@ -16,6 +16,9 @@ namespace ArabDev.Services.Services.Users
         Task<PaginateResultDto<UserDetailsDto>> GetAllUserAsync(UserSpecification spec);
         Task<UserDetailsDto> AddOrUpdatePictureAsync(UserupdataPictureDTo pictureDto);
 
+        Task<UserDetailsDto> UpdateUserDetailsAsync(UserDetailsDto dto);
+
+
 
 
     }

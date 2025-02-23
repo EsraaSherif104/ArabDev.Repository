@@ -17,6 +17,10 @@ namespace ArabDev.Services.Services.Helper
             CreateMap<User, UserDetailsDto>()
                 .ForMember(d => d.PictureUrl, o => o.MapFrom<UserPictureURlResolve>());
 
+            CreateMap<UserDetailsDto, User>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null)); // لا يتم تحديث الخصائص الفارغة
+
+
         }
 
     }

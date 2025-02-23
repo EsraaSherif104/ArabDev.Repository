@@ -58,6 +58,35 @@ namespace ArabDevCommunity.PL.Controllers
             }
         }
 
+        [HttpPut("Update")]
+        public async Task<ActionResult<ApiResponse>> UpdateUserDetails([FromBody] UserDetailsDto dto)
+        {
+            if (string.IsNullOrEmpty(dto.Id))
+            {
+                return BadRequest(new ApiResponse(400, "User ID is required"));
+            }
+
+            try
+            {
+                // 3. Search for the user
+                var result = await _userService.UpdateUserDetailsAsync(dto);
+
+                // 4. If the user is found and updated successfully, send a success response
+                return Ok(new ApiResponse(200, "Data updated successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // 5. If the user is not found
+                return NotFound(new ApiResponse(404, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                // 6. In case of any unexpected error
+                return StatusCode(500, new ApiResponse(500, "Internal server error"));
+            }
+        }
+
+
 
 
 
