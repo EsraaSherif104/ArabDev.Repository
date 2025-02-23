@@ -4,8 +4,11 @@ using ArabDev.Repository.Interface;
 using ArabDev.Repository.Repositories;
 using ArabDev.Services.Services.Helper;
 using ArabDev.Services.Services.Users;
+using ArabDevCommunity.PL.Error;
 using ArabDevCommunity.PL.Extention;
 using ArabDevCommunity.PL.Helper;
+using ArabDevCommunity.PL.Middleware;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArabDevCommunity.PL
@@ -24,10 +27,7 @@ namespace ArabDevCommunity.PL
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 
             });
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddAutoMapper(typeof(MappingProfile));
-
+            builder.Services.AddApplicationServices();
             builder.Services.AddIdentityServices(builder.Configuration);
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -39,6 +39,7 @@ namespace ArabDevCommunity.PL
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+              //  app.UseMiddleware<ExceptionMiddleware>();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }

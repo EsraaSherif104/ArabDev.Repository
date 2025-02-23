@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ArabDevCommunity.PL.Controllers
 {
-    [Route("errors/{Code}")]
+    [Route("errors/{code}")]
     [ApiController]
     [ApiExplorerSettings(IgnoreApi =true)]
     public class ErrorsController : ControllerBase

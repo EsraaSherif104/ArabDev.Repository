@@ -27,7 +27,10 @@ namespace ArabDevCommunity.PL.Controllers
 
         public async Task<ActionResult<UserDetailsDto>> GetUSerById(string? id)
         {
+
             var result = await _userService.GetUserByIdAsync(id);
+          
+
             return Ok(result);
         }
 
