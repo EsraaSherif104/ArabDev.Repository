@@ -37,10 +37,10 @@ namespace ArabDev.Repository.Repositories
         public async Task AddAsync(TEntity entity)
        => await _context.Set<TEntity>().AddAsync(entity);
 
-        public void UpdateAsync(TEntity entity)
+        public async Task UpdateAsync(TEntity entity)
          => _context.Set<TEntity>().Update(entity);
 
-        public void DeleteAsync(TEntity entity)
+        public async Task DeleteAsync(TEntity entity)
          => _context.Set<TEntity>().Remove(entity);
 
         public async Task<TEntity> GetWithSpecificationByIdAsync(ISpecification<TEntity> spac)

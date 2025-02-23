@@ -18,6 +18,9 @@ namespace ArabDev.Services.Services.Users
 
         Task<UserDetailsDto> UpdateUserDetailsAsync(UserDetailsDto dto);
 
+        Task DeleteUserAsync(string userId);
+
+
 
 
 

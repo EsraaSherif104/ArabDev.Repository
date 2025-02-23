@@ -107,5 +107,21 @@ namespace ArabDev.Services.Services.Users
 
             return _mapper.Map<UserDetailsDto>(user);
         }
+
+        public async Task DeleteUserAsync(string userId)
+        {
+            var userRepository = _unitOfWork.Repository<User, string>();
+            var user = await userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+
+            await userRepository.DeleteAsync(user);
+            await _unitOfWork.CompleteAync();
+        }
     }
-    }
+}
+    
+    

@@ -26,8 +26,8 @@ namespace ArabDev.Repository.Interface
 
         Task AddAsync(TEntity entity);
 
-        void UpdateAsync(TEntity entity);
+        Task UpdateAsync(TEntity entity);
 
-        void DeleteAsync(TEntity entity);
+        Task DeleteAsync(TEntity entity);
     }
 }

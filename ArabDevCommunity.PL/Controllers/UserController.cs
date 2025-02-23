@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ArabDevCommunity.PL.Controllers
 {
+    //authorize getall delete
     public class UserController : APIBaseController
     {
         private readonly IUserService _userService;
@@ -85,6 +86,36 @@ namespace ArabDevCommunity.PL.Controllers
                 return StatusCode(500, new ApiResponse(500, "Internal server error"));
             }
         }
+
+        [HttpDelete("{userId}")]
+        public async Task<ActionResult> DeleteUser(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                var response = new ApiResponse(400, "User ID is required");
+                return BadRequest(response); //
+            }
+
+            try
+            {
+                await _userService.DeleteUserAsync(userId);
+
+                var response = new ApiResponse(200, "User successfully deleted");
+                return Ok(response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var response = new ApiResponse(404, ex.Message);
+                return NotFound(response);
+            }
+            catch (Exception ex)
+            {
+                var response = new ApiResponse(500, "An internal server error occurred");
+                return StatusCode(500, response);
+            }
+        }
+
+
 
 
 
