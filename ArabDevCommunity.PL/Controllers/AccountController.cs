@@ -70,7 +70,12 @@ namespace ArabDevCommunity.PL.Controllers
             };
             _mailService.SendEmail(email);
 
-            return Ok(new ApiResponse(200, "Registration successful! Please check your email to confirm your account."));
+            return Ok(new
+            {
+                statuscode = 200,
+                message = "Registration successful! Please check your email to confirm your account.",
+                token = encodedToken  // **إضافة التوكن في الاستجابة**
+            });
         }
 
         [HttpGet("ConfirmEmail")]
@@ -145,6 +150,81 @@ namespace ArabDevCommunity.PL.Controllers
 
 
 
+
+        [HttpPost("ForgetPassword")]
+        public async Task<ActionResult<ApiResponse>> ForgetPassword([FromBody] ForgetPasswordDTO model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse(400, "Invalid request data."));
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user is null)
+                return BadRequest(new ApiResponse(400, "Email not found."));
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            if (string.IsNullOrEmpty(token))
+                return BadRequest(new ApiResponse(400, "Something went wrong."));
+
+            // 🔹 ترميز التوكن لعدم حدوث مشاكل عند الإرسال عبر الرابط
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            // 🔹 تعديل الرابط ليشير إلى واجهة إعادة تعيين كلمة المرور
+            var resetLink = $"https://localhost:7226/api/account/ResetPassword?email={user.Email}&token={encodedToken}";
+
+
+            // 🔹 إرسال الرابط عبر البريد الإلكتروني (يجب استبدال هذا بعملية إرسال حقيقية)
+            var email = new Email
+            {
+                To = user.Email,
+                Subject = "Reset password ",
+                Body = $"Please Reset  your password by clicking on the link: {resetLink}"
+            };
+            _mailService.SendEmail(email);
+            Console.WriteLine($"Original Token: {token}");
+            Console.WriteLine($"Encoded Token: {encodedToken}");
+
+            return Ok(new
+            {
+                statuscode = 200,
+                message = "Reset password link sent to email.",
+                token = encodedToken  // **إضافة التوكن في الاستجابة**
+            });
+        }
+
+
+        [HttpPost("ResetPassword")]
+        public async Task<ActionResult<ApiResponse>> ResetPassword([FromBody] ResetPasswordDTO model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse(400, "Invalid request data."));
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user is null)
+                return BadRequest(new ApiResponse(400, "Invalid email."));
+
+            // 🔹 فك ترميز التوكن
+            var decodedTokenBytes = WebEncoders.Base64UrlDecode(model.Token);
+            var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+
+            // 🔹 تنفيذ إعادة تعيين كلمة المرور
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return BadRequest(new ApiResponse(400, $"Error: {errors}"));
+            }
+            Console.WriteLine($"Decoded Token: {decodedToken}");
+
+
+            return Ok(new ApiResponse(200, "Password reset successfully!"));
+        }
+
+
+
+
+
+
         //Login
         [HttpPost("Login")]
 
@@ -173,6 +253,10 @@ namespace ArabDevCommunity.PL.Controllers
                 Token = await _tokenServices.CreateTokenAsync(user, _userManager)
             });
         }
+
+
+
+
 
 
 
