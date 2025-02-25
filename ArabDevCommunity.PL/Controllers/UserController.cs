@@ -1,8 +1,10 @@
-﻿using ArabDev.Repository.Specification.UserSpecification;
+﻿using ArabDev.Data.Entities;
+using ArabDev.Repository.Specification.UserSpecification;
 using ArabDev.Services.Services.DTOS;
 using ArabDev.Services.Services.Users;
 using ArabDevCommunity.PL.Error;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ArabDevCommunity.PL.Controllers
@@ -11,11 +13,13 @@ namespace ArabDevCommunity.PL.Controllers
     public class UserController : APIBaseController
     {
         private readonly IUserService _userService;
+        private readonly UserManager<User> _userManager;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, UserManager<User> userManager)
         {
 
             _userService = userService;
+            this._userManager = userManager;
         }
         [HttpGet]
 
@@ -36,7 +40,7 @@ namespace ArabDevCommunity.PL.Controllers
             return Ok(result);
         }
 
-        [HttpPut("picture")]
+        [HttpPut("Updatepicture")]
         public async Task<ActionResult<ApiResponse>> AddOrUpdatePicture([FromForm] UserupdataPictureDTo dto)
         {
             try
@@ -87,33 +91,34 @@ namespace ArabDevCommunity.PL.Controllers
             }
         }
 
+
+
+
         [HttpDelete("{userId}")]
-        public async Task<ActionResult> DeleteUser(string userId)
+
+        public async Task<ApiResponse> DeleteUser(string userId)
         {
-            if (string.IsNullOrEmpty(userId))
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
             {
-                var response = new ApiResponse(400, "User ID is required");
-                return BadRequest(response); //
+                return new ApiResponse(404, "User not found");
             }
 
-            try
-            {
-                await _userService.DeleteUserAsync(userId);
+            var result = await _userManager.DeleteAsync(user);
 
-                var response = new ApiResponse(200, "User successfully deleted");
-                return Ok(response);
-            }
-            catch (KeyNotFoundException ex)
+            if (!result.Succeeded)
             {
-                var response = new ApiResponse(404, ex.Message);
-                return NotFound(response);
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return new ApiResponse(400, $"Failed to delete user: {errors}");
             }
-            catch (Exception ex)
-            {
-                var response = new ApiResponse(500, "An internal server error occurred");
-                return StatusCode(500, response);
-            }
+
+            return new ApiResponse(200, "User successfully deleted");
         }
+
+
+
+
         [HttpGet("search")]
         public async Task<IActionResult> SearchUsers(string name)
         {

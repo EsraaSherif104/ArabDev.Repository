@@ -2,6 +2,7 @@
 using ArabDev.Data.Entities;
 using ArabDev.Data.Services;
 using ArabDev.Services;
+using ArabDevCommunity.PL.Helper;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,9 +17,16 @@ namespace ArabDevCommunity.PL.Extention
         public static IServiceCollection AddIdentityServices(this IServiceCollection Services,IConfiguration configuration)
         {
             Services.AddScoped<ITokenServices, TokenServices>();
+            Services.AddScoped<IMailService, EmailSettings>();
 
-            Services.AddIdentity<User, IdentityRole>()
-                           .AddEntityFrameworkStores<ArabDevDbContext>();
+
+            Services.AddIdentity<User, IdentityRole>(options => {
+                options.SignIn.RequireConfirmedAccount = true;
+                options.SignIn.RequireConfirmedEmail = true;
+                options.User.RequireUniqueEmail = true;
+            })
+                           .AddEntityFrameworkStores<ArabDevDbContext>().
+                           AddDefaultTokenProviders(); ;
 
             Services.AddAuthentication(options =>
             {

@@ -2,6 +2,7 @@
 using ArabDev.Data.Services;
 using ArabDevCommunity.PL.Dto;
 using ArabDevCommunity.PL.Error;
+using ArabDevCommunity.PL.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Claims;
+using System.Text;
 
 namespace ArabDevCommunity.PL.Controllers
 {
@@ -18,81 +20,186 @@ namespace ArabDevCommunity.PL.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ITokenServices _tokenServices;
-
+        private readonly IMailService _mailService;
 
         public AccountController(UserManager<User> userManager,SignInManager<User> signInManager
-                                 , ITokenServices tokenServices
+                                 , ITokenServices tokenServices, IMailService mailService
 )
         {
             this._userManager = userManager;
             this._signInManager = signInManager;
             this._tokenServices = tokenServices;
+            this._mailService = mailService;
         }
-        //Register
-        [HttpPost("SignUp")]
-        //انا هرجع حاجه من نوع dto
-        public async Task<ActionResult<UserDto>> SignUp(SignUpDto model)
-        {
 
+        [HttpPost("SignUp")]
+        public async Task<ActionResult> SignUp(SignUpDto model)
+        {
             if (CheckedEmailExists(model.Email).Result.Value)
             {
-                return BadRequest(new ApiResponse(400, "email is already in use"));
+                return BadRequest(new ApiResponse(400, "Email is already in use"));
             }
 
-            var User = new User()
+            var user = new User()
             {
                 DisplayName = model.DisplayName,
                 Email = model.Email,
-                UserName=model.Email.Split('@')[0],
-
-
+                UserName = model.Email.Split('@')[0],
             };
-            var result=  await  _userManager.CreateAsync(User,model.Password);
+
+            var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 return BadRequest(new ApiResponse(400, errors));
             }
 
+            // ✅ 📌 **إنشاء توكن لتأكيد البريد**
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(token));
 
+            var confirmationLink = $"https://localhost:7226/api/account/ConfirmEmail?email={user.Email}&token={encodedToken}";
 
-
-            // if (!result.Succeeded) return BadRequest(new ApiResponse(400));
-            var ReturenedUser = new UserDto()
+            // ✅ 📌 **إرسال البريد الإلكتروني**
+            // تحتاج إلى تنفيذ `IMailService.SendEmail` لإرسال البريد الفعلي
+            var email = new Email
             {
-                DisplayName = User.DisplayName,
-                Email = User.Email,
-                Token = await _tokenServices.CreateTokenAsync(User, _userManager)
+                To = user.Email,
+                Subject = "Confirm Your Email",
+                Body = $"Please confirm your email by clicking on the link: {confirmationLink}"
             };
-            return Ok(ReturenedUser);
+            _mailService.SendEmail(email);
 
+            return Ok(new ApiResponse(200, "Registration successful! Please check your email to confirm your account."));
         }
+
+        [HttpGet("ConfirmEmail")]
+        public async Task<ActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string token)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null) return BadRequest(new ApiResponse(400, "Invalid email."));
+
+            try
+            {
+                // فك ترميز التوكن
+                var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+                var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+
+                var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return BadRequest(new ApiResponse(400, $"Error: {errors}"));
+                }
+
+                return Ok(new ApiResponse(200, "Email confirmed successfully!"));
+            }
+            catch (FormatException)
+            {
+                return BadRequest(new ApiResponse(400, "Invalid token format"));
+            }
+        }
+        #region signup
+        //Register
+        // [HttpPost("SignUp")]
+        //انا هرجع حاجه من نوع dto
+        //public async Task<ActionResult<UserDto>> SignUp(SignUpDto model)
+        //{
+
+        //    if (CheckedEmailExists(model.Email).Result.Value)
+        //    {
+        //        return BadRequest(new ApiResponse(400, "email is already in use"));
+        //    }
+
+        //    var User = new User()
+        //    {
+        //        DisplayName = model.DisplayName,
+        //        Email = model.Email,
+        //        UserName=model.Email.Split('@')[0],
+
+
+        //    };
+        //var result=  await  _userManager.CreateAsync(User,model.Password);
+        //if (!result.Succeeded)
+        //{
+        //    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+        //    return BadRequest(new ApiResponse(400, errors));
+        //}
+
+
+
+
+        //    // if (!result.Succeeded) return BadRequest(new ApiResponse(400));
+        //    var ReturenedUser = new UserDto()
+        //    {
+        //        DisplayName = User.DisplayName,
+        //        Email = User.Email,
+        //        Token = await _tokenServices.CreateTokenAsync(User, _userManager)
+        //    };
+        //    return Ok(ReturenedUser);
+
+        //}
+
+        #endregion
+
 
 
         //Login
         [HttpPost("Login")]
-        public async Task<ActionResult<UserDto>>Login(LoginDto model)
+
+        public async Task<ActionResult<UserDto>> Login(LoginDto model)
         {
-            var User= await _userManager.FindByEmailAsync(model.Email);
-            if (User is null) return Unauthorized(new ApiResponse(401, "password or email incorrect"));
+            var user = await _userManager.FindByEmailAsync(model.Email); 
+            if (user is null)
+                return Unauthorized(new ApiResponse(401, "password or email incorrect"));
 
+            // 📌 **التحقق من تأكيد البريد الإلكتروني**
+            if (!await _userManager.IsEmailConfirmedAsync(user))
+            {
+                return Unauthorized(new ApiResponse(401, "Please confirm your email before logging in."));
+            }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(User, model.Password, false);
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
             if (!result.Succeeded)
             {
                 return Unauthorized(new ApiResponse(401, "password or email incorrect"));
             }
+
             return Ok(new UserDto()
             {
-                DisplayName = User.DisplayName,
-                Email = User.Email,
-                Token = await _tokenServices.CreateTokenAsync(User, _userManager)
-
+                DisplayName = user.DisplayName,
+                Email = user.Email,
+                Token = await _tokenServices.CreateTokenAsync(user, _userManager)
             });
         }
 
-       // [Authorize]
 
+
+        #region LOGIN_WITHOUT_CONFIRM
+        //public async Task<ActionResult<UserDto>>Login(LoginDto model)
+        //{
+        //    var User= await _userManager.FindByEmailAsync(model.Email);
+        //    if (User is null) return Unauthorized(new ApiResponse(401, "password or email incorrect"));
+
+
+        //    var result = await _signInManager.CheckPasswordSignInAsync(User, model.Password, false);
+        //    if (!result.Succeeded)
+        //    {
+        //        return Unauthorized(new ApiResponse(401, "password or email incorrect"));
+        //    }
+        //    return Ok(new UserDto()
+        //    {
+        //        DisplayName = User.DisplayName,
+        //        Email = User.Email,
+        //        Token = await _tokenServices.CreateTokenAsync(User, _userManager)
+
+        //    });
+        //}
+
+        // [Authorize]
+
+        #endregion
         [HttpGet("GetCurrentUser")]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
         {
