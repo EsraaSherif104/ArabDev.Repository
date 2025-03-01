@@ -10,7 +10,7 @@ namespace ArabDev.Data.Entities
     {
         public DateTime ShareTime { get; set; }
         public User User { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
 
 
         public Post Post { get; set; }

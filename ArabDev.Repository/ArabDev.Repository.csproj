@@ -7,7 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ArabDev.Data\ArabDev.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Seeding\SeedingData\" />
   </ItemGroup>
 
 </Project>

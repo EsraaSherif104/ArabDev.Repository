@@ -14,7 +14,7 @@ namespace ArabDev.Data.Entities
         [ForeignKey("UserId")]
         [InverseProperty("Comments")]
         public User User { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
 
         [ForeignKey("PostId")]
         [InverseProperty("Comments")]

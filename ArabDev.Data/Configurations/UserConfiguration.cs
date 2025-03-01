@@ -13,11 +13,18 @@ namespace ArabDev.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.Property(x => x.Id).UseIdentityColumn(1, 1);
+            builder.HasKey(u => u.Id);
+
             builder.Property(x => x.UserName).IsRequired().HasMaxLength(200);
-            builder.HasIndex(x => x.Email).IsUnique();
+            builder.HasIndex(x => x.UserName) // إضافة فهرس لجعل اسم المستخدم فريدًا
+                   .IsUnique();
+            builder.Property(u => u.Email)
+                   .IsRequired()
+                   .HasMaxLength(256);
 
-
+            // Add unique index for Email
+            builder.HasIndex(u => u.Email)
+                   .IsUnique();
 
 
         }
