@@ -15,6 +15,7 @@ namespace ArabDev.Data.Entities
         public string DisplayName { get; set; }
         [Required]
         [MaxLength(200)]
+        //
 
         public string Address { get; set; }
         public string Job { get; set; }
