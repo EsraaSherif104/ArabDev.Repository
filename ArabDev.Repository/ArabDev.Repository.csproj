@@ -17,4 +17,8 @@
     <ProjectReference Include="..\ArabDev.Data\ArabDev.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Seeding\SeedingData\" />
+  </ItemGroup>
+
 </Project>
